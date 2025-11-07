@@ -1,0 +1,16 @@
+{
+  "name": "railway-tkt",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "prisma": "^6.19.0"
+  }
+}
