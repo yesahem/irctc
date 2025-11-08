@@ -24,26 +24,26 @@ model User {
 }
 
 model Train {
-  trainId     String    @id @default(uuid())
+  trainId     String    @id @default(uuid()) @db.Uuid
   trainName   String
   origin      String
   destination String
   departure   String
   arrival     String
-  userId      String    @db.Uuid
+  userId      String
   // User        User      @relation(fields: [userId], references: [userId])
   Tickets     Tickets[]
 }
 
 model Tickets {
-  ticketId      String   @id @default(uuid())
+  ticketId      String   @id @default(uuid()) @db.Uuid
   passengerName String
   seatNumber    String
-  trainId       String
+  trainId       String @db.Uuid
   class         Class
   dateOfJourney DateTime
   dateOfBooking DateTime @default(now())
-  userId        String
+  userId        String   @db.Uuid
   Train         Train    @relation(fields: [trainId], references: [trainId])
   user          User     @relation(fields: [userId], references: [userId])
   bookingStatus Status
