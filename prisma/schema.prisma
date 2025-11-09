@@ -15,7 +15,7 @@ datasource db {
 
 model User {
   userId   String    @id @default(uuid()) @db.Uuid
-  age      String
+  age      Int
   email    String    @unique
   name     String?
   userName String    @unique
@@ -39,7 +39,7 @@ model Tickets {
   ticketId      String   @id @default(uuid()) @db.Uuid
   passengerName String
   seatNumber    String
-  trainId       String @db.Uuid
+  trainId       String   @db.Uuid
   class         Class
   dateOfJourney DateTime
   dateOfBooking DateTime @default(now())
