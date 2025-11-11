@@ -5,6 +5,7 @@ import {
   updateUser,
 } from "../controllers/user.controller";
 import express from "express";
+import { userMiddleware } from "../middlewares/user.middleware";
 export const userRouter = express.Router();
 
 userRouter.get("/health", (req, res) => {
@@ -14,5 +15,5 @@ userRouter.get("/health", (req, res) => {
 });
 userRouter.get("/", getAllUsers);
 userRouter.get("/:id", getUserById);
-userRouter.put("/:id", updateUser);
+userRouter.put("/:id", userMiddleware, updateUser);
 userRouter.delete("/:id", deleteUser);

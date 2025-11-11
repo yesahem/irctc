@@ -51,6 +51,7 @@ export async function getUserById(req: Request, res: Response) {
 // Create user is implemented in the auth routes
 
 export async function updateUser(req: Request, res: Response) {
+  console.log("getttttt");
   const { success } = userSignupInput.safeParse(req.body);
 
   if (!success) {
@@ -73,13 +74,15 @@ export async function updateUser(req: Request, res: Response) {
     });
     return;
   }
+
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 13);
     console.log("hashedPassword", hashedPassword);
+    // console.log("req.userId", req.userId);
+  
     const updateUser = await prisma.user.update({
       where: {
-        //TODO: Replace the email with the user id gotten from token
-        userId: req.params.id,
+        userId: req.userId?.userId as string,
       },
       data: {
         age: req.body.age,
