@@ -42,3 +42,5 @@ export const userLoginInput = z.object({
     .min(6, "Password should be at least 6 character long")
     .max(15, "Password shouldn't exceed 15 character"),
 });
+
+
