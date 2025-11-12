@@ -52,7 +52,7 @@ export async function getUserById(req: Request, res: Response) {
 
 export async function updateUser(req: Request, res: Response) {
   console.log("getttttt");
-  const { success } = userSignupInput.safeParse(req.body);
+  const { success, data } = userSignupInput.safeParse(req.body);
 
   if (!success) {
     res.json({
@@ -76,19 +76,19 @@ export async function updateUser(req: Request, res: Response) {
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 13);
+    const hashedPassword = await bcrypt.hash(data.password, 13);
     console.log("hashedPassword", hashedPassword);
     // console.log("req.userId", req.userId);
-  
+
     const updateUser = await prisma.user.update({
       where: {
         userId: req.userId?.userId as string,
       },
       data: {
-        age: req.body.age,
-        name: req.body.name,
-        email: req.body.email,
-        userName: req.body.username,
+        age: data.age,
+        name: data.name,
+        email: data.email,
+        userName: data.username,
         password: hashedPassword,
       },
     });
@@ -112,7 +112,57 @@ export async function updateUser(req: Request, res: Response) {
   }
 }
 
-// TODO:
-export function deleteUser(req: Request, res: Response) {
-  res.json({ message: `Delete user with ID ${req.params.id}` });
+export async function deleteUser(req: Request, res: Response) {
+  try {
+    // Check if user ID is provided
+    if (!req.params.id) {
+      res.status(400).json({
+        message: "User ID is required",
+      });
+      return;
+    }
+
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+      where: {
+        userId: req.params.id as string,
+      },
+    });
+
+    if (!userExists) {
+      res.status(404).json({
+        message: "User not found with the given ID",
+      });
+      return;
+    }
+
+    // Delete all tickets associated with the user first
+    await prisma.tickets.deleteMany({
+      where: {
+        userId: req.params.id as string,
+      },
+    });
+
+    // Delete the user
+    const deletedUser = await prisma.user.delete({
+      where: {
+        userId: req.params.id as string,
+      },
+    });
+
+    res.status(200).json({
+      message: "User deleted successfully",
+      deletedUser: {
+        userId: deletedUser.userId,
+        name: deletedUser.name,
+        email: deletedUser.email,
+      },
+    });
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    res.status(500).json({
+      message: "Internal server error while deleting user",
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+  }
 }
