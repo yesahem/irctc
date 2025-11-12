@@ -7,38 +7,49 @@ export async function userMiddleware(
   next: NextFunction,
 ) {
   const authorizationHeader = req.headers["authorization"];
-  console.log("authorizationHeader", authorizationHeader);
 
-  if (!authorizationHeader?.startsWith("Bearer")) {
-    res
-      .json({
-        message: "Please provide a valid bearer token",
-      })
-      .status(403);
-    return;
-  }
-
-  const token = authorizationHeader?.split(" ")[1];
-
-  if (!token) {
-    return;
-  }
-  console.log("JWT secret:", process.env.JWT_SECRET)
-  const validateToken = jwt.verify(token , process.env.JWT_SECRET!);
-  console.log("validateToken", validateToken);
-  if (!validateToken) {
-    res.json({
-      message: "invaid token",
+  if (!authorizationHeader?.startsWith("Bearer ")) {
+    res.status(403).json({
+      message: "Please provide a valid bearer token",
     });
     return;
   }
 
-  console.log("JWT_SECRET", process.env.JWT_SECRET);
-  const decodedValue = jwt.decode(token);
-  // console.log("decoded value", decodedValue);
-  // console.log("type of decoded value", typeof decodedValue);
+  const token = authorizationHeader.split(" ")[1]?.trim();
 
-  req.userId = decodedValue as JwtPayload;
-  // console.log("req.userId", req.userId);
+  if (!token) {
+    res.status(401).json({
+      message: "Token is missing",
+    });
+    return;
+  }
+
+  let verifiedToken: string | JwtPayload;
+
+  try {
+    verifiedToken = jwt.verify(token, process.env.JWT_SECRET!);
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(401).json({
+        message: "Token has expired. Please sign in again to obtain a new token.",
+      });
+      return;
+    }
+    res.status(401).json({
+      message: "Invalid or expired token",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    return;
+  }
+
+  if (typeof verifiedToken !== "object" || verifiedToken === null) {
+    res.status(401).json({
+      message: "Invalid token payload",
+    });
+    return;
+  }
+
+  req.userId = verifiedToken;
+
   next();
 }
